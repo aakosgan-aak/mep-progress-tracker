@@ -1,0 +1,57 @@
+MEP PROGRESS TRACKER - QUICK START
+==================================
+
+This is a portable browser-based MEP progress monitoring tool.
+
+No installation is required.
+
+How to Start
+------------
+1. Download or clone the repository.
+2. Open the folder.
+3. Double-click MEP_Progress_Tracker_Portable.html.
+
+The tool will open in your default browser, such as Microsoft Edge or Google Chrome.
+
+Basic Workflow
+--------------
+1. Enter the Floor / Level.
+2. Select the MEP System.
+3. Select the Sub-System / Work Item.
+4. Enter Planned %.
+5. Enter Actual %.
+6. Enter Contractor and Remarks if needed.
+7. Click Add Progress Row.
+8. Export the report as CSV or Excel-compatible XLS.
+
+Main Buttons
+------------
+Add Progress Row:
+Adds the current progress entry to the table.
+
+Generate Sample Floors:
+Creates sample project data for testing.
+
+Save Project Data:
+Saves all entered data as a JSON file.
+
+Load Project Data:
+Loads a previously saved JSON project data file.
+
+Delete Selected:
+Deletes selected rows from the table.
+
+Clear All:
+Clears all rows.
+
+Export CSV:
+Exports the progress table as a CSV file.
+
+Export Excel .XLS:
+Exports an Excel-compatible report including the progress table, summary, and delay register.
+
+Important Note
+--------------
+The exported XLS file is an Excel-compatible HTML file with .xls extension.
+Excel may show a warning that the file format and extension do not match.
+Click Yes/Open to continue.
