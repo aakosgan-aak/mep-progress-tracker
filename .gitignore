@@ -1,0 +1,13 @@
+# OS files
+.DS_Store
+Thumbs.db
+
+# Local exports
+*.csv
+*.xls
+*.xlsx
+*.json
+
+# Temporary files
+*.tmp
+*.bak
