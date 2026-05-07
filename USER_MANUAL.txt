@@ -1,0 +1,216 @@
+MEP PROGRESS TRACKER - USER MANUAL
+==================================
+
+Version
+-------
+Portable HTML Edition
+
+Purpose
+-------
+MEP Progress Tracker is a simple standalone tool for monitoring MEP progress by floor, system, and sub-system.
+
+It is designed for:
+- Building projects
+- Hospitals
+- Hotels
+- Commercial towers
+- MEP contractors
+- Planning engineers
+- Project control engineers
+- Project managers
+
+This tool does not connect to Primavera P6, Oracle Primavera Cloud, Microsoft Project, SYNCHRO, Navisworks, or any external database.
+It is a lightweight progress monitoring template application.
+
+System Requirements
+-------------------
+The tool works on most computers with a modern web browser.
+
+Recommended browsers:
+- Microsoft Edge
+- Google Chrome
+- Mozilla Firefox
+
+No installation is required.
+
+You do not need:
+- Python
+- .NET installation
+- Admin rights
+- Database connection
+- Primavera P6
+- Any server setup
+
+How to Launch the Tool
+----------------------
+1. Download or clone the repository.
+2. Open the folder.
+3. Double-click MEP_Progress_Tracker_Portable.html.
+4. The tool opens in your browser.
+
+Main Screen Overview
+--------------------
+The main screen contains:
+
+1. Data Entry Area
+   Used to enter floor, system, sub-system, planned progress, actual progress, contractor, and remarks.
+
+2. Action Buttons
+   Used to add rows, generate sample data, save/load project data, delete rows, clear data, and export reports.
+
+3. Summary Cards
+   Shows total work items, average actual progress, average variance, delayed items, and completed items.
+
+4. Progress Table
+   Shows all entered progress rows.
+
+Data Entry Fields
+-----------------
+Floor / Level:
+Examples: Level 01, Level 02, Basement 01, Roof, Plant Room.
+
+System:
+Main MEP discipline or system. Available systems include Electrical, ELV, ACMV / HVAC, BMS, Fire Protection, PA System, Plumbing, Sanitary, Lift, Gas, ESC, and Plant Room.
+
+Sub-System / Work Item:
+Detailed work package under the selected MEP system. Examples include 1st Fix, 2nd Fix, Ducting, Piping, Sprinkler, Fire Pump, CCTV, Control Panel, Testing, and Commissioning.
+
+Planned %:
+Planned progress percentage for the selected item. Value must be between 0 and 100.
+
+Actual %:
+Actual completed progress percentage. Value must be between 0 and 100.
+
+Contractor:
+Responsible subcontractor or team.
+
+Remarks:
+Optional notes, delay reasons, or comments.
+
+Progress Status Logic
+---------------------
+The tool automatically calculates status based on Planned % and Actual %.
+
+Completed:
+Actual % is 100 or higher.
+
+Not Started:
+Actual % is 0.
+
+Delayed:
+Actual % is lower than Planned %.
+
+In Progress:
+Actual % is greater than or equal to Planned %, but less than 100.
+
+Variance %
+----------
+Variance is calculated as:
+
+Variance % = Actual % - Planned %
+
+Examples:
+Planned 100%, Actual 70%  -> Variance -30%
+Planned 80%, Actual 80%   -> Variance 0%
+Planned 50%, Actual 60%   -> Variance +10%
+
+Color Meaning
+-------------
+Completed: Green
+Delayed: Red
+In Progress: Yellow
+Not Started: Blue
+
+How to Add a Progress Row
+-------------------------
+1. Enter the Floor / Level.
+2. Select the System.
+3. Select the Sub-System.
+4. Enter Planned %.
+5. Enter Actual %.
+6. Enter Contractor.
+7. Enter Remarks if needed.
+8. Click Add Progress Row.
+
+Generate Sample Floors
+----------------------
+This button creates sample MEP progress data.
+Use it to test the tool, demonstrate the workflow, and understand how reports look before entering real project data.
+
+Save Project Data
+-----------------
+This button saves all current rows into a JSON file.
+Use this when you want to continue later, move the project data to another computer, or keep a backup of the entered data.
+
+Load Project Data
+-----------------
+This button loads a previously saved JSON file.
+
+Delete Selected
+---------------
+Each table row has a checkbox in the first column.
+Tick one or more rows, then click Delete Selected.
+
+Clear All
+---------
+This removes all rows from the current table. The tool asks for confirmation before clearing the data.
+
+Export CSV
+----------
+This exports the progress table as a CSV file.
+CSV is useful for Excel, Power BI, data exchange, and further analysis.
+
+Export Excel .XLS
+-----------------
+This exports an Excel-compatible report.
+The report includes the main progress table, a summary section, and a delay register.
+
+Important:
+The XLS export is technically an HTML-based Excel-compatible file.
+When opening it in Excel, Excel may show a warning that the file format and extension do not match. This is normal. Click Yes/Open to continue.
+
+Delay Register
+--------------
+The Delay Register section includes only rows where Actual % is lower than Planned %. This helps the project team focus on delayed MEP work items.
+
+Recommended Site Workflow
+-------------------------
+1. Site engineer collects progress from each floor.
+2. MEP coordinator validates progress.
+3. User enters the progress into the tool.
+4. Tool calculates status and variance.
+5. User exports Excel or CSV report.
+6. Report is shared with project manager, client, or planning team.
+
+Recommended Data Structure
+--------------------------
+Use consistent naming for floors, systems, contractors, and remarks.
+
+Examples for remarks:
+- Material delay
+- Area not released
+- Drawing pending
+- Inspection pending
+- Manpower shortage
+- Rework required
+
+Limitations
+-----------
+This is a simple standalone monitoring tool.
+It does not provide database storage, multi-user access, cloud synchronization, Primavera integration, schedule logic, baseline comparison, critical path analysis, automatic email sending, or user login.
+
+Data Privacy
+------------
+The tool runs locally in the browser. Entered data is not uploaded anywhere. Exported files are created directly on your computer.
+
+Best Practice
+-------------
+At the end of each reporting period:
+1. Export Excel .XLS.
+2. Export CSV.
+3. Save Project Data JSON.
+4. Store all three files in the weekly report folder.
+
+Future Improvements
+-------------------
+Possible next versions may include PDF export, dashboard charts, contractor performance report, floor heatmap, weekly trend tracking, planned vs actual curve, Power BI-ready export format, and custom system/sub-system configuration.
