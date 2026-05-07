@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>MEP Progress Tracker</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+body{font-family:Segoe UI,Arial,sans-serif;margin:0;background:#f3f6fa;color:#1f2937}.header{background:#17324d;color:#fff;padding:18px 24px}.header h1{margin:0;font-size:24px}.header p{margin:6px 0 0;color:#dbeafe}.wrap{padding:16px}.panel,.card{background:#fff;border:1px solid #d8dee6;border-radius:10px;padding:14px;margin-bottom:14px;box-shadow:0 2px 8px rgba(15,23,42,.04)}.grid{display:grid;grid-template-columns:120px 160px 210px 100px 100px 170px 1fr;gap:10px;align-items:end}label{display:block;font-size:12px;font-weight:700;margin-bottom:5px;color:#334155}input,select{width:100%;height:34px;border:1px solid #cbd5e1;border-radius:7px;padding:0 8px}button{border:0;border-radius:8px;padding:9px 13px;color:#fff;background:#1f6fb2;cursor:pointer;font-weight:700;margin:6px 6px 0 0}.secondary{background:#64748b}.danger{background:#b42318}.export{background:#107c41}.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.value{font-size:24px;font-weight:800;margin-top:5px}.muted{color:#64748b;font-size:12px;font-weight:700}.table-wrap{overflow:auto;max-height:420px}table{width:100%;border-collapse:collapse;font-size:13px}th{background:#17324d;color:#fff;position:sticky;top:0}td,th{border:1px solid #d1d5db;padding:8px;text-align:center}.completed{background:#c6efce!important;color:#006100;font-weight:800}.delayed{background:#ffc7ce!important;color:#9c0006;font-weight:800}.progress{background:#ffeb9c!important;color:#9c6500;font-weight:800}.notstarted{background:#d9eaf7!important;color:#1f4e78;font-weight:800}@media(max-width:1000px){.grid{grid-template-columns:1fr 1fr}.cards{grid-template-columns:1fr 1fr}}@media(max-width:600px){.grid,.cards{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="header"><h1>MEP Progress Monitoring Tool</h1><p>Portable browser version: no Python, no .NET, no installation.</p></div>
+<div class="wrap">
+<div class="panel">
+<div class="grid">
+<div><label>Floor / Level</label><input id="floor" value="Level 01"></div>
+<div><label>System</label><select id="system" onchange="updateSubs()"><option>Electrical</option><option>ELV</option><option>ACMV / HVAC</option><option>BMS</option><option>Fire Protection</option><option>PA System</option><option>Plumbing</option><option>Sanitary</option><option>Lift</option><option>Gas</option><option>ESC</option><option>Plant Room</option></select></div>
+<div><label>Sub-System / Work Item</label><select id="subsystem"></select></div>
+<div><label>Planned %</label><input id="planned" type="number" min="0" max="100" step="0.1" value="100"></div>
+<div><label>Actual %</label><input id="actual" type="number" min="0" max="100" step="0.1" value="0"></div>
+<div><label>Contractor</label><input id="contractor" value="MEP Contractor"></div>
+<div><label>Remarks</label><input id="remarks" placeholder="Optional note"></div>
+</div>
+<button onclick="addRow()">Add Progress Row</button><button class="secondary" onclick="sample()">Generate Sample Floors</button><button class="secondary" onclick="saveData()">Save Project Data</button><button class="secondary" onclick="loadPicker.click()">Load Project Data</button><input id="loadPicker" type="file" accept=".json" style="display:none" onchange="loadData(event)"><button class="danger" onclick="deleteSelected()">Delete Selected</button><button class="danger" onclick="clearAll()">Clear All</button><button class="export" onclick="exportCsv()">Export CSV</button><button class="export" onclick="exportXls()">Export Excel .XLS</button>
+</div>
+<div class="cards"><div class="card"><div class="muted">Total Work Items</div><div class="value" id="total">0</div></div><div class="card"><div class="muted">Average Actual Progress</div><div class="value" id="avg">0.0%</div></div><div class="card"><div class="muted">Average Variance</div><div class="value" id="var">0.0%</div></div><div class="card"><div class="muted">Delayed / Completed</div><div class="value"><span id="delayed">0</span> / <span id="completed">0</span></div></div></div>
+<div class="panel table-wrap"><table><thead><tr><th>Select</th><th>Floor</th><th>System</th><th>Sub-System</th><th>Planned %</th><th>Actual %</th><th>Variance %</th><th>Status</th><th>Contractor</th><th>Remarks</th></tr></thead><tbody id="tbody"></tbody></table></div>
+<p class="muted">Standalone progress monitoring template. It does not connect to Primavera/P6 or schedule systems.</p>
+</div>
+<script>
+const rows=[];
+const subs={"Electrical":["1st Fix","2nd Fix","3rd Fix","Testing","Commissioning"],"ELV":["CCTV","Access Control","Data","Communication","Testing"],"ACMV / HVAC":["Ducting","Piping","Insulation","Equipment","Testing"],"BMS":["Control Panel","Wiring","Integration","Testing"],"Fire Protection":["Sprinkler","Fire Pump","Alarm","Extinguisher","Testing"],"PA System":["Speakers","Panels","Backbone Cabling","Testing"],"Plumbing":["1st Fix","2nd Fix","Testing","Commissioning"],"Sanitary":["1st Fix","2nd Fix","Testing","Commissioning"],"Lift":["Installation","Testing","Commissioning"],"Gas":["Piping","Cylinder Room","Testing","Commissioning"],"ESC":["Installation","Testing","Commissioning"],"Plant Room":["HT/LT Room","Fire Pump Room","Chiller Room","Generator Room","IT/MDF Room","Cooling Tower Room"]};
+function updateSubs(){let s=system.value;subsystem.innerHTML=(subs[s]||[]).map(x=>`<option>${x}</option>`).join('')}
+function pct(id,n){let v=parseFloat(document.getElementById(id).value);if(isNaN(v)||v<0||v>100){alert(n+' must be between 0 and 100');throw 0}return v}
+function status(a,p){if(a>=100)return'Completed';if(a<=0)return'Not Started';if(a<p)return'Delayed';return'In Progress'}
+function addRow(){let p,a;try{p=pct('planned','Planned %');a=pct('actual','Actual %')}catch(e){return}rows.push({floor:floor.value.trim(),system:system.value,subsystem:subsystem.value,planned:p,actual:a,variance:a-p,status:status(a,p),contractor:contractor.value.trim(),remarks:remarks.value.trim()});render()}
+function sample(){rows.length=0;['B2','B1','Ground Floor','Level 01','Level 02','Level 03','Roof'].forEach(f=>['Electrical','ACMV / HVAC','Fire Protection','Plumbing','BMS'].forEach(s=>subs[s].slice(0,3).forEach(ss=>{let a=(f=='B2'||f=='B1')?100:(f=='Ground Floor'?70:40);rows.push({floor:f,system:s,subsystem:ss,planned:100,actual:a,variance:a-100,status:status(a,100),contractor:'MEP Contractor',remarks:''})})));render()}
+function cls(s){return s=='Completed'?'completed':s=='Delayed'?'delayed':s=='In Progress'?'progress':'notstarted'}
+function render(){tbody.innerHTML=rows.map((r,i)=>`<tr><td><input type="checkbox" data-i="${i}"></td><td>${esc(r.floor)}</td><td>${esc(r.system)}</td><td>${esc(r.subsystem)}</td><td>${r.planned.toFixed(1)}%</td><td>${r.actual.toFixed(1)}%</td><td>${r.variance.toFixed(1)}%</td><td class="${cls(r.status)}">${r.status}</td><td>${esc(r.contractor)}</td><td>${esc(r.remarks)}</td></tr>`).join('');summary()}
+function summary(){let c=rows.length,ta=rows.reduce((s,r)=>s+r.actual,0),tp=rows.reduce((s,r)=>s+r.planned,0),aa=c?ta/c:0,ap=c?tp/c:0;total.textContent=c;avg.textContent=aa.toFixed(1)+'%';var_el=document.getElementById('var');var_el.textContent=(aa-ap).toFixed(1)+'%';delayed.textContent=rows.filter(r=>r.status=='Delayed').length;completed.textContent=rows.filter(r=>r.status=='Completed').length}
+function deleteSelected(){[...document.querySelectorAll('tbody input:checked')].map(x=>+x.dataset.i).sort((a,b)=>b-a).forEach(i=>rows.splice(i,1));render()}
+function clearAll(){if(confirm('Clear all rows?')){rows.length=0;render()}}
+function saveData(){download(new Blob([JSON.stringify(rows,null,2)],{type:'application/json'}),'MEP_Progress_Project_Data.json')}
+function loadData(e){let f=e.target.files[0];if(!f)return;let r=new FileReader();r.onload=x=>{try{let d=JSON.parse(x.target.result);rows.length=0;d.forEach(y=>rows.push(y));render()}catch(err){alert('Invalid project data file')}};r.readAsText(f);e.target.value=''}
+function exportCsv(){if(!rows.length)return alert('No data');let h=['Floor','System','Sub-System','Planned %','Actual %','Variance %','Status','Contractor','Remarks'];let lines=[h.map(csv).join(',')];rows.forEach(r=>lines.push([r.floor,r.system,r.subsystem,r.planned.toFixed(1),r.actual.toFixed(1),r.variance.toFixed(1),r.status,r.contractor,r.remarks].map(csv).join(',')));download(new Blob([lines.join('\r\n')],{type:'text/csv'}),'MEP_Progress_Report_'+stamp()+'.csv')}
+function exportXls(){if(!rows.length)return alert('No data');let d=rows.filter(r=>r.status=='Delayed');let html=`<html><head><meta charset="utf-8"><style>body{font-family:Calibri}table{border-collapse:collapse}td,th{border:1px solid #999;padding:5px;text-align:center}th{background:#1F4E78;color:white}.completed{background:#C6EFCE}.delayed{background:#FFC7CE}.progress{background:#FFEB9C}.notstarted{background:#D9EAF7}</style></head><body><h2>MEP Progress Monitoring Report</h2><p>Generated: ${new Date().toLocaleString()}</p>${tbl(rows)}<br><h2>Summary</h2><table><tr><th>Total Items</th><th>Average Actual %</th><th>Average Variance %</th><th>Delayed Items</th><th>Completed Items</th></tr><tr><td>${total.textContent}</td><td>${avg.textContent}</td><td>${document.getElementById('var').textContent}</td><td>${delayed.textContent}</td><td>${completed.textContent}</td></tr></table><br><h2>Delay Register</h2>${tbl(d)}</body></html>`;download(new Blob([html],{type:'application/vnd.ms-excel'}),'MEP_Progress_Report_'+stamp()+'.xls')}
+function tbl(data){return '<table><tr><th>Floor</th><th>System</th><th>Sub-System</th><th>Planned %</th><th>Actual %</th><th>Variance %</th><th>Status</th><th>Contractor</th><th>Remarks</th></tr>'+data.map(r=>`<tr><td>${esc(r.floor)}</td><td>${esc(r.system)}</td><td>${esc(r.subsystem)}</td><td>${r.planned.toFixed(1)}%</td><td>${r.actual.toFixed(1)}%</td><td>${r.variance.toFixed(1)}%</td><td class="${cls(r.status)}">${r.status}</td><td>${esc(r.contractor)}</td><td>${esc(r.remarks)}</td></tr>`).join('')+'</table>'}
+function download(blob,name){let a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),100)}
+function esc(v){return String(v??'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;')}function csv(v){return '"'+String(v??'').replaceAll('"','""')+'"'}function stamp(){let d=new Date(),p=n=>String(n).padStart(2,'0');return d.getFullYear()+p(d.getMonth()+1)+p(d.getDate())+'_'+p(d.getHours())+p(d.getMinutes())}
+updateSubs();render();
+</script>
+</body>
+</html>
